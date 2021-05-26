@@ -6,8 +6,8 @@ use Illuminate\Http\Request;
 use App\Models\User;
 //use Laravel\Sanctum\HasApiTokens;
 use Illuminate\Support\Facades\Hash;
+use Auth;
 
-https://www.youtube.com/watch?v=n-J3zw4OWmI&t=432s
 
 class AuthController extends Controller
 {
@@ -31,5 +31,26 @@ class AuthController extends Controller
             'access_token' => $token,
             'token_type' => 'Bearer'
         ]);
+    }
+
+    public function login( Request $request ) {
+        $email = $request['email'];
+        $password = $request['password'];
+        if( !Auth::attempt( array('email' => $email, 'password' => $password) )) {
+            return response()->json([
+                'message' => 'Invalid Login'              
+            ] ,401);
+        }
+
+        $user = User::where('email', $request['email'])->firstOrFail();
+        $token =  $user->createToken('auth_token')->plainTextToken;
+        return response()->json([
+            'access_token' => $token,
+            'token_type' => 'Bearer'
+        ]);
+    }
+
+    public function infouser(Request $request) {
+        return $request->user();
     }
 }
